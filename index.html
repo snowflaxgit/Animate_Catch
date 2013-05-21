@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="viewport" content="user-scalable=1.0,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+
+<title>Catch Animation</title>
+<style>
+
+.innerRight {
+    -webkit-animation: playright 0.5s steps(5);
+	-moz-animation: playright 0.5s steps(5);
+}
+@-webkit-keyframes playright { 
+      0% { background-position:    0px 0; } 
+    100% { background-position: -250px 0; }
+}
+
+@-moz-keyframes playright { 
+      0% { background-position:    0px 0; } 
+    100% { background-position: -250px 0; }
+}
+
+
+.innerLeft {
+    -webkit-animation: playleft 0.5s steps(5);
+	-moz-animation: playleft 0.5s steps(5);
+}
+@-webkit-keyframes playleft { 
+      0% { background-position: 0px 0; }
+	 100% { background-position: -250px 0; }
+}
+
+@-moz-keyframes playleft { 
+      0% { background-position: 0px 0; }
+	 100% { background-position: -250px 0; }
+}
+
+.customStyleTrans{
+	 -webkit-transition: left .5s, -webkit-transform .5s;
+	 -moz-transition:left .5s, -moz-transform .5s;
+	 -ms-transition:left .5s, -ms-transform .5s;
+}
+</style>
+
+<script type="text/javascript" src="jquery.hammer.js"></script>
+<script type="text/javascript" src="jquery-1.7.2.min.js"></script>
+
+<script>
+var isSlideDragStart = false;
+var dragStartX;
+var dragEndX;
+var innerFrameLeft;
+var innerFrameRight;
+var frame;
+var isLeftSide;
+var isRightSide;
+
+window.onload = function(){
+	document.body.addEventListener('touchmove',function(event){event.preventDefault();},false);
+	
+	innerFrameLeft = document.getElementById("innerleft");
+	innerFrameRight = document.getElementById("innerright");
+	frame = document.getElementById("frame");
+	frame.className = 'customStyleTrans';
+	document.addEventListener('keydown', function(event) {
+		if (event.keyCode == 37) {
+			onLeftclick();
+		}
+		else if (event.keyCode == 39) {
+			onRightclick();
+		}
+		else if (event.keyCode == 32) {
+			ResetAnimate();
+		}
+	}, true);
+
+	var hammertime = Hammer(frame, {});
+	hammertime.on("hold tap swipe doubletap transformstart transform transformend dragstart drag dragend release pinch pinchin pinchout", function (event) {
+		if(event.type == "dragstart"){	// touch device slide drag Start call
+				isSlideDragStart = true;
+				slideDragStartEvent(event);
+		}else if( (event.type == "drag")){//Drag Move	
+			if(isSlideDragStart == true){
+				slideDragMoveEvent(event);
+			}
+		}else if( (event.type == "dragend")){ // Slide drag End here
+			if(isSlideDragStart == true){
+				slideDragEndEvent(event);
+			}
+		}
+		else if( (event.type == "doubletap")){ // Slide drag End here
+			ResetAnimate();
+		}
+	});
+}
+
+onLeftclick = function(){
+	//if(isLeftSide){return};
+	innerFrameLeft.style.visibility = "visible";
+	innerFrameRight.style.visibility = "hidden";
+	innerFrameLeft.className = 'innerLeft';
+	innerFrameRight.className = '';
+	frame.className = 'customStyleTrans';
+	frame.style.left = 10+"%"
+	isLeftSide = true;
+	isRightSide = false;
+}
+onRightclick = function(){
+	//if(isRightSide){return};
+	innerFrameRight.style.visibility = "visible";
+	innerFrameLeft.style.visibility = "hidden";
+	innerFrameRight.className = 'innerRight';
+	innerFrameLeft.className = '';
+	frame.className = 'customStyleTrans';
+	frame.style.left = 90+"%";
+	isRightSide = true;
+	isLeftSide = false;
+}
+
+ResetAnimate = function(){
+	frame.style.left = 50+"%";
+}
+
+slideDragStartEvent = function(e){
+	e.stopPropagation();
+	dragStartX = e.gesture.touches[0].pageX;
+}
+
+slideDragMoveEvent = function(e){
+	e.stopPropagation();
+	frame.className = '';
+	//frame.style.left = e.gesture.touches[0].pageX - 25 + "px";
+}
+
+slideDragEndEvent = function(e){
+	e.stopPropagation();
+	dragEndX = e.gesture.touches[0].pageX;
+	if(dragEndX > dragStartX){
+		onRightclick();
+	}else if(dragEndX < dragStartX){
+		onLeftclick();
+	}
+}
+
+</script>
+
+</head>
+<body style="background-color:#ccc">
+<h2> Double Tap to Reset </h2>
+<h1> Swipe Left/ Right to Animate </h1>
+<div id="frame" style="height:72px; width:50px; top:200px; left:50%; position:absolute; overflow:hidden;">
+  <div id="innerleft" style="height:72px; width:250px; top:0px; left:0px; position:absolute; background-image:url(sprite-steps-left2.png);"></div>
+  <div id="innerright" style="height:72px; width:250px; top:0px; left:0px; position:absolute; background-image:url(sprite-steps-right.png); visibility:hidden;"></div>
+</div>
+
+</body>
+</html>
